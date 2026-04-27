@@ -1,27 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="google" content="notranslate">
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
 <title>Election Assistant</title>
 
-<!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
-
-<!-- (Optional) Google Analytics placeholder -->
-<script>
-  // You can add GA ID if needed
-  function track(event){
-    console.log("Tracking:", event);
-  }
-</script>
 
 <style>
 body {
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg,#667eea,#764ba2);
-  display:flex; justify-content:center; align-items:center;
-  height:100vh; color:#222;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+  color:#222;
 }
 
 .app {
@@ -37,7 +31,6 @@ body {
   color:#fff;
   padding:15px;
   text-align:center;
-  font-weight:bold;
 }
 
 .chat {
@@ -72,7 +65,7 @@ button {
 }
 
 button:focus {
-  outline:2px solid #000;
+  outline:2px solid black;
 }
 </style>
 </head>
@@ -85,27 +78,24 @@ button:focus {
   <div id="chatBox" class="chat" aria-live="polite"></div>
 
   <div id="controls" class="controls">
-    <button onclick="App.start()" aria-label="Start assistant">Start</button>
+    <button onclick="App.start()" aria-label="Start">Start</button>
+    <button onclick="App.runTests()">Run Tests</button>
   </div>
 </div>
 
 <script>
-
-/* ---------- CORE MODULE ---------- */
 const App = (() => {
 
   let state = {
-    UserName: "",
-    currentstep: "start"
+    name: "",
+    step: "start"
   };
 
   const chatBox = document.getElementById("chatBox");
   const controls = document.getElementById("controls");
 
-  /* ---------- UTIL ---------- */
-
   function sanitize(str){
-    return str.replace(/[<>]/g, "");trim():
+    return str.replace(/[<>]/g, "").trim();
   }
 
   function createMsg(type, text){
@@ -117,8 +107,8 @@ const App = (() => {
 
   function renderMsg(type, text){
     const fragment = document.createDocumentFragment();
-fragment.appendChild(createMsg(type, text));
-chatBox.appendChild(fragment);
+    fragment.appendChild(createMsg(type, text));
+    chatBox.appendChild(fragment);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
@@ -134,15 +124,13 @@ chatBox.appendChild(fragment);
   }
 
   function greet(){
-    const arr = [
-      "Hey 👋 let's understand elections!",
-      "Hi 😊 I'll guide you step by step.",
-      "Welcome! Let's simplify voting."
+    const msgs = [
+      "Hey 👋 Let's understand elections!",
+      "Hi 😊 Ready to explore voting?",
+      "Welcome! I'll guide you step by step."
     ];
-    return arr[Math.floor(Math.random()*arr.length)];
+    return msgs[Math.floor(Math.random()*msgs.length)];
   }
-
-  /* ---------- FLOW ---------- */
 
   function start(){
     chatBox.innerHTML = "";
@@ -153,34 +141,34 @@ chatBox.appendChild(fragment);
   function askName(){
     renderMsg("bot", "What should I call you?");
     controls.innerHTML = `
-      <label for="nameInput">Name:</label><br>
-      <input id="nameInput" aria-label="Enter name">
+      <label>Name:</label><br>
+      <input id="nameInput">
       <button onclick="App.saveName()">OK</button>
     `;
   }
 
   function saveName(){
-    const val = document.getElementById("nameInput").value.trim();
-    if(!val) return;
+    const val = document.getElementById("nameInput").value;
+    if(!val.trim()) return;
 
     state.name = sanitize(val);
     renderMsg("user", state.name);
-    renderMsg("bot", `Nice to meet you, ${state.name}!`);
+    renderMsg("bot", "Nice to meet you, " + state.name + "!");
 
     showMenu();
   }
 
   function showMenu(){
-    renderMsg("bot","What would you like to explore?");
+    renderMsg("bot","What do you want to explore?");
     renderOptions([
       {label:"Eligibility", action:checkAge},
       {label:"Registration", action:showRegistration},
-      {label:"Voting Process", action:showVoting}
+      {label:"Voting", action:showVoting}
     ]);
   }
 
   function checkAge(){
-    renderMsg("bot","Are you 18 or above?");
+    renderMsg("bot","Are you 18+?");
     renderOptions([
       {label:"Yes", action:() => handleAge(true)},
       {label:"No", action:() => handleAge(false)}
@@ -190,24 +178,23 @@ chatBox.appendChild(fragment);
   function handleAge(flag){
     renderMsg("user", flag ? "Yes" : "No");
     renderMsg("bot", flag ? "You're eligible to vote!" : "You need to be 18+.");
-
     showExtras();
   }
 
   function showRegistration(){
-    renderMsg("bot","Steps to register:");
+    renderMsg("bot","Steps:");
     renderMsg("bot","Form → Documents → Voter ID");
     showExtras();
   }
 
   function showVoting(){
-    renderMsg("bot","Voting day steps:");
+    renderMsg("bot","Voting day:");
     renderMsg("bot","Booth → Verify → Vote → Ink mark");
     showExtras();
   }
 
   function showTimeline(){
-    renderMsg("bot","Election timeline:");
+    renderMsg("bot","Timeline:");
     renderMsg("bot","Announcement → Campaign → Voting → Result");
   }
 
@@ -219,13 +206,19 @@ chatBox.appendChild(fragment);
     ]);
   }
 
-  /* ---------- TESTING ---------- */
-
   function runTests(){
     console.assert(typeof start === "function","Start exists");
-    console.assert(typeof sanitize === "function","Sanitize exists");
-    console.log("Basic tests passed");
+    console.assert(typeof sanitize === "function","Sanitize works");
+    alert("Tests passed!");
   }
+
+  // accessibility (Enter key)
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Enter"){
+      const btn = document.querySelector("button");
+      if(btn) btn.click();
+    }
+  });
 
   return {
     start,
@@ -234,7 +227,6 @@ chatBox.appendChild(fragment);
   };
 
 })();
-
 </script>
 
 </body>
