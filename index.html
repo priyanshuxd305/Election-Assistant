@@ -1,188 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="google" content="notranslate">
 <meta charset="UTF-8">
-<title>Election Guide Assistant</title>
+<title>Election Assistant</title>
+
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+
+<!-- (Optional) Google Analytics placeholder -->
+<script>
+  // You can add GA ID if needed
+  function track(event){
+    console.log("Tracking:", event);
+  }
+</script>
 
 <style>
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #89f7fe, #66a6ff);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  display:flex; justify-content:center; align-items:center;
+  height:100vh; color:#222;
 }
 
-.container {
-  width: 400px;
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  overflow: hidden;
+.app {
+  width:420px;
+  background:#fff;
+  border-radius:15px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+  overflow:hidden;
 }
 
 .header {
-  background: #007bff;
-  color: white;
-  padding: 15px;
-  text-align: center;
-  font-weight: bold;
+  background:#4facfe;
+  color:#fff;
+  padding:15px;
+  text-align:center;
+  font-weight:bold;
 }
 
 .chat {
-  height: 320px;
-  overflow-y: auto;
-  padding: 15px;
+  height:320px;
+  overflow-y:auto;
+  padding:15px;
 }
 
 .msg {
-  margin: 8px 0;
-  padding: 10px;
-  border-radius: 10px;
-  max-width: 75%;
+  margin:8px 0;
+  padding:10px;
+  border-radius:10px;
+  max-width:75%;
 }
 
-.bot {
-  background: #f1f1f1;
-}
-
-.user {
-  background: #007bff;
-  color: white;
-  margin-left: auto;
-}
+.bot { background:#f1f1f1; }
+.user { background:#4facfe; color:white; margin-left:auto; }
 
 .controls {
-  padding: 10px;
-  text-align: center;
+  padding:10px;
+  text-align:center;
 }
 
 button {
-  margin: 5px;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 8px;
-  background: #007bff;
-  color: white;
-  cursor: pointer;
+  margin:5px;
+  padding:8px 12px;
+  border:none;
+  border-radius:8px;
+  background:#4facfe;
+  color:white;
+  cursor:pointer;
 }
 
-input {
-  padding: 8px;
-  margin-top: 5px;
-  width: 70%;
+button:focus {
+  outline:2px solid #000;
 }
 </style>
 </head>
 
 <body>
 
-<div class="container">
-  <div class="header">🗳 Election Guide</div>
-  <div class="chat" id="chatBox"></div>
-  <div class="controls" id="controlPanel">
-    <button onclick="beginChat()">Start</button>
+<div class="app" role="application">
+  <div class="header">🗳 Election Assistant</div>
+
+  <div id="chatBox" class="chat" aria-live="polite"></div>
+
+  <div id="controls" class="controls">
+    <button onclick="App.start()" aria-label="Start assistant">Start</button>
   </div>
 </div>
 
 <script>
-let chatBox = document.getElementById("chatBox");
-let controlPanel = document.getElementById("controlPanel");
-let userName = "";
 
-function bot(msg){
-  chatBox.innerHTML += `<div class="msg bot">${msg}</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
+/* ---------- CORE MODULE ---------- */
+const App = (() => {
 
-function user(msg){
-  chatBox.innerHTML += `<div class="msg user">${msg}</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
+  let state = {
+    UserName: "",
+    currentstep: "start"
+  };
 
-function beginChat(){
-  chatBox.innerHTML = "";
-  bot("Hey! 👋 I'm here to make elections super easy to understand.");
-  setTimeout(askUserName, 500);
-}
+  const chatBox = document.getElementById("chatBox");
+  const controls = document.getElementById("controls");
 
-function askUserName(){
-  bot("Before we start, what's your name?");
-  controlPanel.innerHTML = `
-    <input id="nameInput" placeholder="Enter your name">
-    <button onclick="saveUserName()">OK</button>
-  `;
-}
+  /* ---------- UTIL ---------- */
 
-function saveUserName(){
-  let name = document.getElementById("nameInput").value;
-  if(name.trim() === "") return;
-  user(name);
-  userName = name;
-  bot("Nice to meet you, " + userName + "! 😊");
-  setTimeout(checkAge, 500);
-}
+  function sanitize(str){
+    return str.replace(/[<>]/g, "");trim():
+  }
 
-function checkAge(){
-  bot("Quick question — are you 18 or above?");
-  controlPanel.innerHTML = `
-    <button onclick="eligible()">Yes</button>
-    <button onclick="notEligible()">No</button>
-  `;
-}
+  function createMsg(type, text){
+    const el = document.createElement("div");
+    el.className = "msg " + type;
+    el.textContent = text;
+    return el;
+  }
 
-function notEligible(){
-  user("No");
-  bot("No worries! You’ll be able to vote once you turn 18 👍");
-  restartOption();
-}
+  function renderMsg(type, text){
+    const fragment = document.createDocumentFragment();
+fragment.appendChild(createMsg(type, text));
+chatBox.appendChild(fragment);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
 
-function eligible(){
-  user("Yes");
-  bot("Great! That means you can take part in voting 🗳");
-  setTimeout(checkRegistration, 500);
-}
+  function renderOptions(options){
+    controls.innerHTML = "";
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.textContent = opt.label;
+      btn.onclick = opt.action;
+      btn.setAttribute("aria-label", opt.label);
+      controls.appendChild(btn);
+    });
+  }
 
-function checkRegistration(){
-  bot("Are you already registered as a voter?");
-  controlPanel.innerHTML = `
-    <button onclick="registered()">Yes</button>
-    <button onclick="notRegistered()">No</button>
-  `;
-}
+  function greet(){
+    const arr = [
+      "Hey 👋 let's understand elections!",
+      "Hi 😊 I'll guide you step by step.",
+      "Welcome! Let's simplify voting."
+    ];
+    return arr[Math.floor(Math.random()*arr.length)];
+  }
 
-function notRegistered(){
-  user("No");
-  bot("Alright, here's how you can register:");
-  bot("1. Fill the voter registration form\n2. Upload required documents\n3. Receive your voter ID");
-  showExtras();
-}
+  /* ---------- FLOW ---------- */
 
-function registered(){
-  user("Yes");
-  bot("Awesome! Here's what happens on voting day:");
-  bot("1. Visit your polling booth\n2. Verify your ID\n3. Cast your vote using EVM\n4. Get ink mark");
-  showExtras();
-}
+  function start(){
+    chatBox.innerHTML = "";
+    renderMsg("bot", greet());
+    askName();
+  }
 
-function showTimeline(){
-  bot("Here’s a quick look at the election timeline:");
-  bot("• Announcement\n• Campaigning\n• Voting Day\n• Result Declaration");
-}
+  function askName(){
+    renderMsg("bot", "What should I call you?");
+    controls.innerHTML = `
+      <label for="nameInput">Name:</label><br>
+      <input id="nameInput" aria-label="Enter name">
+      <button onclick="App.saveName()">OK</button>
+    `;
+  }
 
-function showExtras(){
-  controlPanel.innerHTML = `
-    <button onclick="showTimeline()">View Timeline</button>
-    <button onclick="beginChat()">Restart</button>
-  `;
-}
+  function saveName(){
+    const val = document.getElementById("nameInput").value.trim();
+    if(!val) return;
 
-function restartOption(){
-  controlPanel.innerHTML = `
-    <button onclick="beginChat()">Restart</button>
-  `;
-}
+    state.name = sanitize(val);
+    renderMsg("user", state.name);
+    renderMsg("bot", `Nice to meet you, ${state.name}!`);
+
+    showMenu();
+  }
+
+  function showMenu(){
+    renderMsg("bot","What would you like to explore?");
+    renderOptions([
+      {label:"Eligibility", action:checkAge},
+      {label:"Registration", action:showRegistration},
+      {label:"Voting Process", action:showVoting}
+    ]);
+  }
+
+  function checkAge(){
+    renderMsg("bot","Are you 18 or above?");
+    renderOptions([
+      {label:"Yes", action:() => handleAge(true)},
+      {label:"No", action:() => handleAge(false)}
+    ]);
+  }
+
+  function handleAge(flag){
+    renderMsg("user", flag ? "Yes" : "No");
+    renderMsg("bot", flag ? "You're eligible to vote!" : "You need to be 18+.");
+
+    showExtras();
+  }
+
+  function showRegistration(){
+    renderMsg("bot","Steps to register:");
+    renderMsg("bot","Form → Documents → Voter ID");
+    showExtras();
+  }
+
+  function showVoting(){
+    renderMsg("bot","Voting day steps:");
+    renderMsg("bot","Booth → Verify → Vote → Ink mark");
+    showExtras();
+  }
+
+  function showTimeline(){
+    renderMsg("bot","Election timeline:");
+    renderMsg("bot","Announcement → Campaign → Voting → Result");
+  }
+
+  function showExtras(){
+    renderOptions([
+      {label:"Timeline", action:showTimeline},
+      {label:"Menu", action:showMenu},
+      {label:"Restart", action:start}
+    ]);
+  }
+
+  /* ---------- TESTING ---------- */
+
+  function runTests(){
+    console.assert(typeof start === "function","Start exists");
+    console.assert(typeof sanitize === "function","Sanitize exists");
+    console.log("Basic tests passed");
+  }
+
+  return {
+    start,
+    saveName,
+    runTests
+  };
+
+})();
+
 </script>
 
 </body>
