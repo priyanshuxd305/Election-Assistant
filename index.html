@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Election Assistant</title>
+
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.chat-container {
+  width: 380px;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.header {
+  background: #4facfe;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.chat-box {
+  padding: 15px;
+  height: 300px;
+  overflow-y: auto;
+}
+
+.bot, .user {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 80%;
+}
+
+.bot {
+  background: #f1f1f1;
+}
+
+.user {
+  background: #4facfe;
+  color: white;
+  margin-left: auto;
+}
+
+.buttons {
+  text-align: center;
+  padding: 10px;
+}
+
+button {
+  margin: 5px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: #4facfe;
+  color: white;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #007bff;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="chat-container">
+  <div class="header">🗳 Election Assistant</div>
+  <div class="chat-box" id="chat"></div>
+  <div class="buttons" id="buttons">
+    <button onclick="start()">Start</button>
+  </div>
+</div>
+
+<script>
+let chat = document.getElementById("chat");
+let buttons = document.getElementById("buttons");
+
+function addBot(msg){
+  chat.innerHTML += `<div class='bot'>${msg}</div>`;
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function addUser(msg){
+  chat.innerHTML += `<div class='user'>${msg}</div>`;
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function start(){
+  chat.innerHTML = "";
+  addBot("Welcome! Let's understand the election process.");
+  addBot("Are you 18+?");
+  buttons.innerHTML = `
+    <button onclick="ageYes()">Yes</button>
+    <button onclick="ageNo()">No</button>
+  `;
+}
+
+function ageNo(){
+  addUser("No");
+  addBot("❌ You are not eligible to vote.");
+  endOptions();
+}
+
+function ageYes(){
+  addUser("Yes");
+  addBot("Are you a registered voter?");
+  buttons.innerHTML = `
+    <button onclick="regYes()">Yes</button>
+    <button onclick="regNo()">No</button>
+  `;
+}
+
+function regNo(){
+  addUser("No");
+  addBot("📝 Registration Steps:<br>1. Fill form<br>2. Upload documents<br>3. Get voter ID");
+  extraOptions();
+}
+
+function regYes(){
+  addUser("Yes");
+  addBot("🗳 Voting Steps:<br>1. Go to polling booth<br>2. Verify ID<br>3. Vote using EVM<br>4. Ink mark");
+  extraOptions();
+}
+
+function timeline(){
+  addBot("📅 Election Timeline:<br>1. Announcement<br>2. Campaign<br>3. Voting Day<br>4. Result");
+}
+
+function extraOptions(){
+  buttons.innerHTML = `
+    <button onclick="timeline()">View Timeline</button>
+    <button onclick="start()">Restart</button>
+  `;
+}
+
+function endOptions(){
+  buttons.innerHTML = `
+    <button onclick="start()">Restart</button>
+  `;
+}
+</script>
+
+</body>
+</html>
